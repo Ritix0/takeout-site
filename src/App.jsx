@@ -1,16 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Download, ShieldCheck, Zap, Layers, FolderHeart, Check, X } from 'lucide-react';
-import ActivationSection from './ActivationSection'; // <--- ДОБАВЛЕНО
+import { Download, ShieldCheck, Zap, Layers, FolderHeart, Check, X, Cookie } from 'lucide-react';
+import ActivationSection from './ActivationSection';
+import LegalModal from './LegalModal'; // Импортируем модалку
 
 // --- НАСТРОЙКИ ---
 const DOWNLOAD_LINK = "https://github.com/Ritix0/Takeout-Rebuilder/releases/download/v1.0.0/TakeoutRebuilder.exe"; 
-
-// !!! ВСТАВЬ СЮДА ССЫЛКУ НА ОПЛАТУ ИЗ DIGISELLER !!!
-// Она выглядит как https://digiseller.market/asp2/pay_wm.asp?id_d=...
 const BUY_LINK = "https://oplata.info/asp2/pay.asp?id_d=5633748"; 
 
 function App() {
+  const [legalType, setLegalType] = useState(null); // 'privacy' или 'terms'
+  const [showCookieConsent, setShowCookieConsent] = useState(false);
+
+  // Проверка куки при запуске
+  useEffect(() => {
+    const consent = localStorage.getItem('cookieConsent');
+    if (!consent) {
+      setShowCookieConsent(true);
+    }
+  }, []);
+
+  const acceptCookies = () => {
+    localStorage.setItem('cookieConsent', 'true');
+    setShowCookieConsent(false);
+  };
+
   const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.8 } }
@@ -27,7 +41,6 @@ function App() {
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            {/* Кнопка скролла вниз к активации */}
             <a 
               href="#activate" 
               style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.9rem', fontWeight: '500', transition: '0.2s' }}
@@ -139,7 +152,6 @@ function App() {
               <li style={{color: 'white'}}><Check size={18} color="#3B82F6" /> <b>Priority Support</b></li>
               <li><Check size={18} color="#3B82F6" /> Instant Activation Key</li>
             </ul>
-            {/* ССЫЛКА НА DIGISELLER */}
             <a href={BUY_LINK} target="_blank" rel="noreferrer" className="btn-buy">
               Get Pro Access
             </a>
@@ -151,14 +163,38 @@ function App() {
       {/* --- БЛОК АКТИВАЦИИ --- */}
       <ActivationSection />
 
-      <footer style={{textAlign: 'center', padding: '40px', color: '#64748b', fontSize: '0.9rem', borderTop: '1px solid rgba(255,255,255,0.05)'}}>
-        <p style={{ marginBottom: '15px' }}>© 2026 Takeout Rebuilder. Built for the Cloud Exodus.</p>
+      {/* FOOTER */}
+      <footer style={{
+        textAlign: 'center', 
+        padding: '60px 20px', 
+        color: '#64748b', 
+        fontSize: '0.9rem', 
+        borderTop: '1px solid rgba(255,255,255,0.05)',
+        background: '#020617'
+      }}>
+        <p style={{ marginBottom: '20px' }}>© 2026 Takeout Rebuilder. Built for the Cloud Exodus.</p>
         
+        {/* Ссылки на документы */}
+        <div style={{ marginBottom: '30px', display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button 
+            onClick={() => setLegalType('terms')}
+            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.9rem' }}
+          >
+            Terms of Service
+          </button>
+          <button 
+            onClick={() => setLegalType('privacy')}
+            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.9rem' }}
+          >
+            Privacy Policy
+          </button>
+        </div>
+
         {/* Блок контактов */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
           <span>Need help or found a bug?</span>
           <a 
-            href="mailto:milligat.software@hotmail.com" 
+            href="mailto:milligat13@gmail.com" 
             style={{ color: '#3B82F6', textDecoration: 'none', fontWeight: 'bold', fontSize: '1rem', transition: '0.2s' }}
             onMouseOver={(e) => e.target.style.color = '#60a5fa'}
             onMouseOut={(e) => e.target.style.color = '#3B82F6'}
@@ -167,6 +203,57 @@ function App() {
           </a>
         </div>
       </footer>
+
+      {/* COOKIE BANNER (Адаптивный) */}
+      {showCookieConsent && (
+        <div style={{
+          position: 'fixed', 
+          bottom: '20px', 
+          left: '50%', 
+          transform: 'translateX(-50%)',
+          width: '90%',
+          maxWidth: '600px',
+          background: 'rgba(30, 41, 59, 0.95)', 
+          backdropFilter: 'blur(10px)',
+          border: '1px solid #334155',
+          borderRadius: '12px',
+          padding: '15px 20px',
+          zIndex: 9998,
+          boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '15px',
+          flexWrap: 'wrap' // Перенос для мобилок
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: '200px' }}>
+            <Cookie size={24} color="#3B82F6" />
+            <p style={{ fontSize: '0.85rem', color: '#cbd5e1', margin: 0, lineHeight: 1.4 }}>
+              We use cookies to ensure you get the best experience. By using our website, you agree to our Privacy Policy.
+            </p>
+          </div>
+          <button 
+            onClick={acceptCookies}
+            style={{
+              background: '#3B82F6', 
+              color: 'white', 
+              border: 'none', 
+              padding: '8px 20px', 
+              borderRadius: '6px', 
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
+            }}
+          >
+            Got it
+          </button>
+        </div>
+      )}
+
+      {/* Модальное окно с документами */}
+      <LegalModal type={legalType} onClose={() => setLegalType(null)} />
+
     </div>
   );
 }
