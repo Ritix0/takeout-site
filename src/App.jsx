@@ -5,7 +5,7 @@ import ActivationSection from './ActivationSection';
 import LegalModal from './LegalModal'; // Импортируем модалку
 
 // --- НАСТРОЙКИ ---
-const DOWNLOAD_LINK = "https://github.com/Ritix0/Takeout-Rebuilder/releases/download/v1.0.0/TakeoutRebuilder.exe"; 
+const DOWNLOAD_LINK = "https://github.com/Ritix0/Takeout-Rebuilder/releases/download/v1.0.1/TakeoutRebuilder.exe"; 
 const BUY_LINK = "https://oplata.info/asp2/pay.asp?id_d=5633748"; 
 
 function App() {
