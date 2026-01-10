@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Key, Lock, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 
-// ТВОЯ ССЫЛКА НА GOOGLE SCRIPT (Оставь как есть)
+// ТВОЯ ССЫЛКА НА GOOGLE SCRIPT
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZVWuEiqo8I0qG1khIfr7VkndpQ2gk8ywrCQJmJVbb_IrjIFyyoHKK73c0kCUVgUCt/exec"; 
 
 export default function ActivationSection() {
@@ -9,9 +9,24 @@ export default function ActivationSection() {
   const [hwid, setHwid] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  
+  // Состояние для таймера (анти-спам)
+  const [cooldown, setCooldown] = useState(0);
+
+  // Эффект для таймера обратного отсчета
+  useEffect(() => {
+    let timer;
+    if (cooldown > 0) {
+      timer = setInterval(() => {
+        setCooldown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [cooldown]);
 
   const handleActivate = async () => {
-    if (!voucher || !hwid) return;
+    if (!voucher || !hwid || cooldown > 0) return;
+    
     setLoading(true);
     setResult(null);
 
@@ -41,11 +56,12 @@ export default function ActivationSection() {
       });
     } finally {
       setLoading(false);
+      // Запускаем таймер на 10 секунд после любого результата
+      setCooldown(10);
     }
   };
 
   return (
-    // Добавили id="activate" для навигации
     <div id="activate" style={{ 
       padding: '60px 20px', 
       background: '#0f172a', 
@@ -67,7 +83,7 @@ export default function ActivationSection() {
         borderRadius: '16px', 
         border: '1px solid rgba(255,255,255,0.1)',
         boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
-        boxSizing: 'border-box' // Важно для мобильных
+        boxSizing: 'border-box'
       }}>
         
         {/* INPUT: VOUCHER */}
@@ -84,7 +100,7 @@ export default function ActivationSection() {
               onChange={(e) => setVoucher(e.target.value)}
               style={{
                 width: '100%', 
-                padding: '12px 12px 12px 40px', // Увеличил тач-зону
+                padding: '12px 12px 12px 40px',
                 background: '#0f172a', 
                 border: '1px solid #334155', 
                 borderRadius: '8px', 
@@ -92,7 +108,7 @@ export default function ActivationSection() {
                 outline: 'none',
                 fontFamily: 'monospace', 
                 fontSize: '1rem',
-                boxSizing: 'border-box' // Чтобы не вылезало за края
+                boxSizing: 'border-box'
               }}
             />
           </div>
@@ -126,19 +142,28 @@ export default function ActivationSection() {
           </div>
         </div>
 
-        {/* BUTTON */}
+        {/* BUTTON WITH COOLDOWN */}
         <button 
           onClick={handleActivate}
-          disabled={loading || !voucher || !hwid}
+          disabled={loading || cooldown > 0 || !voucher || !hwid}
           style={{
             width: '100%', padding: '14px', borderRadius: '8px', border: 'none',
-            background: loading ? '#334155' : '#2563eb', color: 'white', fontWeight: 'bold', fontSize: '1rem',
-            cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px',
+            // Цвет кнопки меняется, если идет кулдаун
+            background: (loading || cooldown > 0) ? '#334155' : '#2563eb', 
+            color: 'white', fontWeight: 'bold', fontSize: '1rem',
+            cursor: (loading || cooldown > 0) ? 'not-allowed' : 'pointer', 
+            display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px',
             transition: '0.2s',
             boxSizing: 'border-box'
           }}
         >
-          {loading ? <Loader className="spin" size={20} /> : "Get Activation Key"}
+          {loading ? (
+            <Loader className="spin" size={20} />
+          ) : cooldown > 0 ? (
+            `Wait ${cooldown}s` // Показываем таймер
+          ) : (
+            "Get Activation Key"
+          )}
         </button>
 
         {/* RESULT AREA */}
@@ -147,7 +172,7 @@ export default function ActivationSection() {
             marginTop: '25px', padding: '20px', borderRadius: '12px',
             background: result.type === 'success' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
             border: result.type === 'success' ? '1px solid rgba(34, 197, 94, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
-            wordBreak: 'break-all' // Чтобы длинный ключ не ломал мобилку
+            wordBreak: 'break-all'
           }}>
             {result.type === 'success' ? (
               <>
